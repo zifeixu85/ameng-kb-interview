@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "vault_name": "虚构顾问知识库",
+  "mode": "new",
+  "primary_uses": ["business", "customers", "projects"],
+  "first_input": "一份虚构客户会议纪要",
+  "first_output": "第一版 FAQ 与项目下一步",
+  "optional_modules": ["products", "customers", "stories", "methods", "business_knowledge", "opportunities"],
+  "project_types": ["client"],
+  "custom_project_types": [],
+  "task_system": "other",
+  "calendar_system": "other",
+  "existing_mappings": {},
+  "privacy_notes": ["所有客户信息匿名化且保持 internal"],
+  "evidence": {
+    "products": "正在提供虚构的一对一顾问服务",
+    "customers": "有重复用户问题与访谈记录",
+    "stories": "有可脱敏的交付案例",
+    "methods": "有固定诊断步骤",
+    "business_knowledge": "需要整理 FAQ 与服务流程",
+    "opportunities": "需要跟进合作线索"
+  }
+}

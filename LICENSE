@@ -1,0 +1,9 @@
+# Licensing
+
+This repository uses two licenses:
+
+1. Source code under `skill/ameng-kb-interview/scripts/`, root `scripts/`, `tests/`, and `.github/` is licensed under the MIT License in `LICENSE-CODE`.
+2. `SKILL.md`, `agents/openai.yaml`, Markdown documentation, references, examples, and starter-vault templates are licensed under Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International in `LICENSE-CONTENT`.
+3. Files under `dist/` are composite distribution archives. Each archive includes the license and notice files that apply to its packaged code and content.
+
+Third-party classroom materials are not included in this repository and are not covered by either license. See `NOTICE.md`.

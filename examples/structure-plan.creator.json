@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "vault_name": "虚构创作者知识库",
+  "mode": "new",
+  "primary_uses": ["personal", "content", "projects"],
+  "first_input": "一段虚构访谈录音",
+  "first_output": "一篇内容母稿",
+  "optional_modules": ["profile", "stories", "methods", "content"],
+  "project_types": ["content"],
+  "custom_project_types": ["播客项目"],
+  "task_system": "none",
+  "calendar_system": "none",
+  "existing_mappings": {},
+  "privacy_notes": ["家庭经历只保留在自我说明书"],
+  "evidence": {
+    "profile": "每月需要更新对外介绍",
+    "stories": "已有多个虚构采访案例",
+    "methods": "有稳定的选题检查方法",
+    "content": "每周发布一篇文章"
+  }
+}

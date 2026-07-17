@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "vault_name": "虚构学生知识库",
+  "mode": "new",
+  "primary_uses": ["learning", "projects"],
+  "first_input": "一篇课程笔记",
+  "first_output": "一份学习复盘",
+  "optional_modules": [],
+  "project_types": ["learning"],
+  "custom_project_types": [],
+  "task_system": "none",
+  "calendar_system": "none",
+  "existing_mappings": {},
+  "privacy_notes": ["成绩与家庭信息保持 private"],
+  "evidence": {
+    "learning": "正在准备一门持续八周的考试"
+  }
+}

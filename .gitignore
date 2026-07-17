@@ -1,0 +1,12 @@
+.DS_Store
+Thumbs.db
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.env
+.env.*
+!.env.example
+.obsidian/workspace*.json
+.obsidian/cache/
+*.tmp
+*.bak
