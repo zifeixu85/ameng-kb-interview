@@ -43,6 +43,40 @@ class DistributionTests(unittest.TestCase):
                 self.assertTrue(chinese)
                 self.assertTrue(all(item.flag_bits & 0x800 for item in chinese))
 
+    def test_checked_in_archives_match_release_sources(self):
+        skill_archive = ROOT / "dist" / "ameng-kb-interview.skill"
+        with zipfile.ZipFile(skill_archive) as archive:
+            for relative in (
+                "SKILL.md",
+                "agents/openai.yaml",
+                "references/first-run-and-resume.md",
+                "references/interview-playbook.md",
+                "references/note-contract.md",
+                "references/routing-and-privacy.md",
+                "references/structure-plan-schema.md",
+                "references/vault-architecture.md",
+            ):
+                source = ROOT / "skill" / "ameng-kb-interview" / relative
+                self.assertEqual(
+                    archive.read(f"ameng-kb-interview/{relative}"),
+                    source.read_bytes(),
+                    f"stale dist entry: {relative}",
+                )
+            for relative in ("PRIVACY.md", "SECURITY.md"):
+                self.assertEqual(
+                    archive.read(f"ameng-kb-interview/{relative}"),
+                    (ROOT / relative).read_bytes(),
+                    f"stale dist entry: {relative}",
+                )
+
+        starter_archive = ROOT / "dist" / "ameng-kb-interview-starter-vault.zip"
+        with zipfile.ZipFile(starter_archive) as archive:
+            self.assertEqual(archive.read("PRIVACY.md"), (ROOT / "PRIVACY.md").read_bytes())
+            self.assertEqual(
+                archive.read("starter-vault/AGENTS.md"),
+                (ROOT / "skill" / "ameng-kb-interview" / "assets" / "starter-vault" / "AGENTS.md").read_bytes(),
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -146,6 +146,41 @@ def validate_plan(plan: dict) -> None:
         validate_relative_path(target, "existing mapping target")
         if PurePosixPath(source).as_posix() not in MAPPABLE_ROOTS:
             raise ValueError(f"existing mapping source must be a fixed root: {source!r}")
+    validate_context_review(plan)
+
+
+def validate_context_review(plan: dict) -> None:
+    review = plan.get("context_review")
+    if review is None:
+        return
+    if plan.get("mode", "new") != "existing":
+        raise ValueError("context_review is only valid when mode is 'existing'")
+    if not isinstance(review, dict):
+        raise ValueError("context_review must be an object")
+
+    reviewed_at = review.get("reviewed_at")
+    if reviewed_at is not None and (not isinstance(reviewed_at, str) or not reviewed_at.strip()):
+        raise ValueError("context_review.reviewed_at must be a non-empty string")
+
+    for key in ("read_scope", "excluded_paths"):
+        values = review.get(key, [])
+        if not isinstance(values, list):
+            raise ValueError(f"context_review.{key} must be an array")
+        for value in values:
+            validate_relative_path(value, f"context_review {key} path")
+
+    source_index_note = review.get("source_index_note")
+    if source_index_note is not None:
+        validate_relative_path(source_index_note, "context_review source index note")
+
+    source_count = review.get("source_count")
+    if source_count is not None and (isinstance(source_count, bool) or not isinstance(source_count, int) or source_count < 0):
+        raise ValueError("context_review.source_count must be a non-negative integer")
+
+    for key in ("known", "missing", "conflicts", "stale_candidates"):
+        values = review.get(key, [])
+        if not isinstance(values, list) or any(not isinstance(value, str) or not value.strip() for value in values):
+            raise ValueError(f"context_review.{key} must be an array of non-empty strings")
 
 
 def validate_relative_path(value: str, label: str) -> None:
@@ -171,7 +206,7 @@ def remap(relative: Path, mappings: dict[str, str]) -> Path:
 
 
 def module_readme(title: str, description: str) -> str:
-    return f"# {title}\n\n{description}\n\n> 本模块由首次建库采访按需启用。只有产生真实内容时才继续增加子目录。\n"
+    return f"# {title}\n\n{description}\n\n> 本模块由首次建库采访或已有笔记证据按需启用。只有产生真实内容时才继续增加子目录。\n"
 
 
 def project_readme(title: str) -> str:
@@ -245,6 +280,7 @@ def agents_markdown(mappings: dict[str, str]) -> str:
             "## 隐私规则",
             "",
             f"- `{private_root}` 默认 private。",
+            "- 用户明确发起建库、自我梳理或个人协作任务时，AI 可定向读取完成任务所需的 private 正文；不默认扫描整个 Vault。",
             "- 日记、健康、家庭、关系和财务信息不得自动进入公开输出。",
             "- 对外内容只读取已确认可用的对外角色与资产；private 内容进入公开输出前必须确认。",
             "",
@@ -266,6 +302,7 @@ def plan_markdown(plan: dict) -> str:
     mappings = plan.get("existing_mappings", {})
     privacy = plan.get("privacy_notes", [])
     evidence = plan.get("evidence", {})
+    context_review = plan.get("context_review")
     lines = [
         f"- 结构版本：{plan.get('schema_version', 1)}",
         f"- Vault 名称：{plan.get('vault_name', '个人知识库')}",
@@ -286,6 +323,25 @@ def plan_markdown(plan: dict) -> str:
     lines.extend([f"- `{source}` → `{target}`" for source, target in mappings.items()] or ["- 无；使用标准目录"])
     lines.extend(["", "## 启用依据", ""])
     lines.extend([f"- `{key}`：{value}" for key, value in evidence.items()] or ["- 暂无"])
+    if context_review:
+        source_note = context_review.get("source_index_note")
+        lines.extend(
+            [
+                "",
+                "## 已有上下文审计",
+                "",
+                f"- 审计日期：{context_review.get('reviewed_at', '待确认')}",
+                f"- 读取范围：{', '.join(f'`{item}`' for item in context_review.get('read_scope', [])) or '未记录'}",
+                f"- 排除路径：{', '.join(f'`{item}`' for item in context_review.get('excluded_paths', [])) or '无额外排除'}",
+                f"- 来源数量：{context_review.get('source_count', '待确认')}",
+                f"- 来源索引：{wikilink(Path(source_note), '上下文审计记录') if source_note else '待建立'}",
+                f"- 已知主题：{'、'.join(context_review.get('known', [])) or '无'}",
+                f"- 缺失：{'、'.join(context_review.get('missing', [])) or '无'}",
+                f"- 冲突：{'、'.join(context_review.get('conflicts', [])) or '无'}",
+                f"- 疑似过期：{'、'.join(context_review.get('stale_candidates', [])) or '无'}",
+                "- 本区块只保留范围、索引与差额状态，不写 private 正文摘要。",
+            ]
+        )
     lines.extend(["", "## 隐私边界", ""])
     lines.extend([f"- {item}" for item in privacy] or ["- 未补充；采用默认隐私规则"])
     lines.extend(

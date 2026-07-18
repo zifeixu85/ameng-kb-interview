@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "vault_name": "虚构已有知识库",
+  "mode": "existing",
+  "primary_uses": ["personal", "projects", "content"],
+  "first_input": "一篇已有项目复盘",
+  "first_output": "一张项目恢复卡",
+  "optional_modules": ["profile", "stories", "methods", "content"],
+  "project_types": ["work"],
+  "custom_project_types": [],
+  "task_system": "none",
+  "calendar_system": "none",
+  "existing_mappings": {
+    "00-系统工作台": "Admin/System",
+    "10-自我说明书": "Personal",
+    "20-可复用资产库": "Cards",
+    "30-项目工作区": "Projects",
+    "40-学习输入库": "Resources"
+  },
+  "privacy_notes": ["Personal 中的 private 内容只用于理解本人，不自动进入公开输出"],
+  "evidence": {
+    "profile": "来自 Personal/对外角色.md：每季需要更新角色说明",
+    "stories": "来自 Projects/项目A/项目复盘.md：有可脱敏案例",
+    "methods": "来自 Projects/项目A/项目复盘.md：反复出现同一检查清单",
+    "content": "来自 Cards/发布索引.md：用户持续写作"
+  },
+  "context_review": {
+    "reviewed_at": "2026-07-18",
+    "read_scope": ["Personal", "Projects", "Cards"],
+    "excluded_paths": ["Personal/日记"],
+    "source_index_note": "Admin/System/采访记录/2026-07-18-已有上下文审计.md",
+    "source_count": 6,
+    "known": ["当前角色", "重复能力", "已启用项目"],
+    "missing": ["首个输出的完成标准"],
+    "conflicts": [],
+    "stale_candidates": ["当前内容平台"]
+  }
+}

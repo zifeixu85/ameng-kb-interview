@@ -23,9 +23,10 @@ last_reviewed: YYYY-MM-DD
 
 - `tags` 至少包含一个 `type/...` 和一个 `topic/...`。
 - `source`、`source_type`、`usage`、`status`、`sensitivity` 必填。
-- Vault 内 Markdown 来源使用 `source_note` wikilink；网页用 `source_url`；Vault 外文件用 `external_path`。
+- Vault 内 Markdown 来源使用 `source_note` wikilink；网页用 `source_url`；Vault 外文件用 `external_path`。已有 Vault 的旧笔记可以直接作为来源，不必先把它复制进采访记录。
 - 不保留空字段。没有值时删掉该字段。
-- AI 新提取的资产默认 `status: 待确认`。
+- AI 新提取的资产默认 `status: 待确认`。基于多个来源时，在正文的“来源证据”中列出每篇原笔记及其支持的结论。
+- 新笔记的 `sensitivity` 默认继承所有来源中最严格的级别；不因摘要或改写就自动降级。
 
 ## 原始采访记录
 
@@ -49,9 +50,32 @@ interview_stage: 0
 
 正文至少包含：采访目标、逐题原话、阶段进度、结构决定、派生笔记、待确认项。
 
+## 已有 Vault 的上下文审计 / 补访记录
+
+已有 Vault 不把历史资料重新抄成一篇“首次采访”。确有补访、冲突裁决或派生写入时，可以建立一篇 private 审计记录：
+
+```yaml
+---
+tags:
+  - type/上下文审计
+  - topic/首次建库
+date: YYYY-MM-DD
+source: 已有 Vault 定向读取与用户增量确认
+source_type: AI整理
+usage:
+  - 记录本次复用范围、差额与裁决
+status: 待确认
+sensitivity: private
+last_reviewed: YYYY-MM-DD
+interview_mode: quick | full
+---
+```
+
+正文记录：实际读取范围、明确排除路径、来源笔记索引、已知信息、待确认、冲突、疑似过期、缺失、用户增量回答与派生笔记。结构方案只保留这些项目的非敏感主题名和审计记录路径，private 细节留在本记录中。
+
 ## 双链最低要求
 
-每篇正式派生笔记至少链接回采访原文或项目母舰。采访原文的“派生笔记”列表必须链接回每篇生成笔记。
+每篇正式派生笔记至少链接回采访原文、上下文审计记录、现有来源笔记或项目母舰。采访 / 审计记录的“派生笔记”列表必须链接回每篇生成笔记。
 
 有效关系包括：来源于、属于、验证、补充、被用于、替代。不要为了数量随机链接同标签笔记。
 

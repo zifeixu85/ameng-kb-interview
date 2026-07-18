@@ -1,4 +1,4 @@
 interface:
   display_name: "采访式个人知识库"
   short_description: "通过对话采访初始化可持续生长的 Obsidian 个人知识库"
-  default_prompt: "使用 $ameng-kb-interview 帮我完成首次采访建库。先判断这是新建还是已有 Vault；已有 Vault 在我确认映射前保持只读。"
+  default_prompt: "使用 $ameng-kb-interview 帮我完成首次建库。先判断这是新建还是已有 Vault；已有 Vault 先只读复用现有笔记，只补问缺失、冲突或疑似过期信息，等我确认方案后再写入。"

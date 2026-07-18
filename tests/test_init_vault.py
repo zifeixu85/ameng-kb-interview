@@ -134,6 +134,72 @@ class InitVaultTests(unittest.TestCase):
             )
             self.assertEqual(validate.returncode, 0, validate.stdout + validate.stderr)
 
+    def test_existing_context_review_is_optional_and_rendered_without_private_body(self):
+        with tempfile.TemporaryDirectory() as temp:
+            vault = Path(temp) / "vault"
+            plan = {
+                "schema_version": 1,
+                "vault_name": "Existing Vault",
+                "mode": "existing",
+                "primary_uses": ["projects"],
+                "optional_modules": [],
+                "project_types": [],
+                "custom_project_types": [],
+                "existing_mappings": {
+                    "00-系统工作台": "Admin/System",
+                    "10-自我说明书": "Personal",
+                },
+                "privacy_notes": [],
+                "evidence": {},
+                "context_review": {
+                    "reviewed_at": "2026-07-18",
+                    "read_scope": ["Personal"],
+                    "excluded_paths": ["Personal/日记"],
+                    "source_index_note": "Admin/System/采访记录/2026-07-18-已有上下文审计.md",
+                    "source_count": 3,
+                    "known": ["当前角色"],
+                    "missing": ["首个输出"],
+                    "conflicts": [],
+                    "stale_candidates": ["当前项目"],
+                },
+            }
+            result = self.run_init(vault, plan)
+            self.assertEqual(result.returncode, 0, result.stderr)
+
+            config = (vault / "Admin" / "System" / "建库配置.md").read_text(encoding="utf-8")
+            self.assertIn("## 已有上下文审计", config)
+            self.assertIn("- 来源数量：3", config)
+            self.assertIn("- 缺失：首个输出", config)
+            self.assertIn("- 疑似过期：当前项目", config)
+            self.assertIn("不写 private 正文摘要", config)
+            saved_plan = json.loads(
+                (vault / "Admin" / "System" / "知识库结构方案.json").read_text(encoding="utf-8")
+            )
+            self.assertEqual(saved_plan["context_review"], plan["context_review"])
+
+    def test_context_review_rejects_paths_outside_the_vault(self):
+        with tempfile.TemporaryDirectory() as temp:
+            vault = Path(temp) / "vault"
+            plan = {
+                "schema_version": 1,
+                "vault_name": "Unsafe context review",
+                "mode": "existing",
+                "optional_modules": [],
+                "project_types": [],
+                "custom_project_types": [],
+                "existing_mappings": {},
+                "context_review": {
+                    "read_scope": ["../outside"],
+                    "known": [],
+                    "missing": [],
+                    "conflicts": [],
+                    "stale_candidates": [],
+                },
+            }
+            result = self.run_init(vault, plan)
+            self.assertEqual(result.returncode, 2)
+            self.assertIn("unsafe context_review read_scope path", result.stderr)
+
     def test_path_traversal_in_custom_project_type_is_rejected(self):
         with tempfile.TemporaryDirectory() as temp:
             vault = Path(temp) / "vault"

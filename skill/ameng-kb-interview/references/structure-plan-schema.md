@@ -6,7 +6,7 @@
 {
   "schema_version": 1,
   "vault_name": "示例知识库",
-  "mode": "new",
+  "mode": "existing",
   "primary_uses": ["personal", "projects", "learning", "content"],
   "first_input": "每周复盘录音",
   "first_output": "一篇内容母稿",
@@ -15,14 +15,31 @@
   "custom_project_types": [],
   "task_system": "none",
   "calendar_system": "none",
-  "existing_mappings": {},
+  "existing_mappings": {
+    "00-系统工作台": "Admin/System",
+    "10-自我说明书": "Personal",
+    "30-项目工作区": "Projects"
+  },
   "privacy_notes": ["家庭与健康信息只保留在 10-自我说明书"],
   "evidence": {
     "content": "用户每周写公众号",
     "talks": "用户每季度做一次线下分享"
+  },
+  "context_review": {
+    "reviewed_at": "2026-07-18",
+    "read_scope": ["Personal", "Projects"],
+    "excluded_paths": ["Personal/日记"],
+    "source_index_note": "Admin/System/采访记录/2026-07-18-已有上下文审计.md",
+    "source_count": 6,
+    "known": ["当前角色", "已启用项目"],
+    "missing": ["首个输出"],
+    "conflicts": [],
+    "stale_candidates": ["当前内容平台"]
   }
 }
 ```
+
+`context_review` 只用于 `mode: existing`，是向后兼容的可选字段；旧方案不需要补它。它只记录本次读取边界、来源索引笔记和差额类型，不写 private 正文摘要。
 
 ## 允许值
 
@@ -36,8 +53,11 @@
 
 ## 生成纪律
 
-1. 每个动态模块必须在 `evidence` 写入来自采访的触发依据。
+1. 每个动态模块必须在 `evidence` 写入触发依据。新 Vault 引用采访回答；已有 Vault 优先引用真正提供证据的现有笔记及必要的增量确认。
 2. 用户只是“未来可能做”时，不启用模块。
 3. 没有参加黑客松时，不把 `hackathon` 写入方案。
 4. Todoist 和日历都可为 `none`；不要把工具选择当成知识库完整性的条件。
 5. 已有 Vault 的 `existing_mappings` 由人和 AI 共同确认，初始化脚本不会自动移动旧目录。
+6. 已有 Vault 的动态模块证据可来自已有笔记或本次增量确认；应在 `evidence` 中标明来源笔记，不得统一写成“来自采访”。
+7. `context_review.source_index_note`、`read_scope` 和 `excluded_paths` 都使用 Vault 内相对路径；不存储绝对路径、密钥或 private 正文。
+8. `known / missing / conflicts / stale_candidates` 只写非敏感主题名和差额状态。详细来源与用户修正保存在 `source_index_note` 指向的 private 审计 / 补访记录。
