@@ -27,6 +27,29 @@
 
 原始采访记录 frontmatter 保存 `interview_stage`。正文末尾维护：
 
+快速版可以只保存当前阶段；标准版和深度版使用更完整的恢复状态：
+
+```yaml
+interview_mode: quick | standard | deep
+interview_status: in_progress | paused | ready_for_first_use | completed
+session_count: 2
+current_topic: values
+next_question_id: self.values.03
+enabled_topics:
+  - identity
+  - values
+  - ai_collaboration
+completed_topics:
+  - identity
+deferred_topics:
+  - health_energy
+last_session_at: YYYY-MM-DD
+```
+
+详细私人答案留在 private 采访记录中；结构方案只保存模块状态、恢复位置和来源索引。
+
+正文末尾维护：
+
 ```markdown
 ## 采访进度
 
@@ -37,6 +60,8 @@
 ```
 
 用户说“暂停”时：先写入进度，再结束当前回合。用户说“继续采访”时：新 Vault 先读取最新采访记录；已有 Vault 同时读取已确认的来源索引。只复述最后一个已确认结论和下一项差额，不从头重复。
+
+标准版 / 深度版每完成一个模块，或连续采访约 30–45 分钟后，主动给出阶段小结：本轮确认了什么、生成了什么、还剩哪些冲突、原定下一模块是什么。让用户选择继续、暂停或切换模块。
 
 ## 冲突处理
 
@@ -59,3 +84,5 @@
 - 有来源双链；
 - 跑通过一次真实输出；
 - 用户知道下一份输入放哪里、如何继续更新。
+
+深度版的“完成”不表示已经穷尽一个人的全部经历。用户选择的模块达到 `completed`，或被明确标记为 `deferred / skipped`；每个完成模块有当前有效的阶段版本；未解决冲突和未来复核时间被记录；同时满足上面的真实输出与更新机制，即可结束本轮共建。

@@ -43,7 +43,7 @@ usage:
 status: 已记录
 sensitivity: private
 last_reviewed: YYYY-MM-DD
-interview_mode: quick | full
+interview_mode: quick | standard | deep
 interview_stage: 0
 ---
 ```
@@ -67,11 +67,40 @@ usage:
 status: 待确认
 sensitivity: private
 last_reviewed: YYYY-MM-DD
-interview_mode: quick | full
+interview_mode: quick | standard | deep
 ---
 ```
 
 正文记录：实际读取范围、明确排除路径、来源笔记索引、已知信息、待确认、冲突、疑似过期、缺失、用户增量回答与派生笔记。结构方案只保留这些项目的非敏感主题名和审计记录路径，private 细节留在本记录中。
+
+## 自我说明书笔记
+
+自我说明书除了通用属性，还应区分“是否确认”“有多确定”“适用于哪个阶段”：
+
+```yaml
+---
+tags:
+  - type/自我说明书
+  - topic/价值观与驱动力
+date: YYYY-MM-DD
+source: 深度自我说明书采访 YYYY-MM-DD
+source_type: 自述
+source_note: "[[00-系统工作台/采访记录/YYYY-MM-DD-深度自我说明书采访|采访原文]]"
+usage:
+  - 帮助 AI 理解选择原则与协作边界
+status: 待确认
+confidence: 待确认 | 阶段性判断 | 已确认
+valid_period: 长期 | 当前阶段 | 已过期
+sensitivity: private
+last_reviewed: YYYY-MM-DD
+---
+```
+
+- `status`：这篇笔记是否已经进入可复用流程。
+- `confidence`：用户对这条自我判断有多确定；心理测试和 AI 推断不能直接标记为 `已确认`。
+- `valid_period`：区分长期特质、当前阶段和已过期结论。
+- `sensitivity`：决定读取和公开边界，与前三者不是一回事。
+- 身份、价值观、性格、状态和关系会变化；修改当前版本时保留历史来源和阶段差异，不覆盖成“永远如此”。
 
 ## 双链最低要求
 

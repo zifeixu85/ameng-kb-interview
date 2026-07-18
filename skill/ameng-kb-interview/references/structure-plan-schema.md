@@ -7,10 +7,12 @@
   "schema_version": 1,
   "vault_name": "示例知识库",
   "mode": "existing",
+  "interview_depth": "standard",
   "primary_uses": ["personal", "projects", "learning", "content"],
   "first_input": "每周复盘录音",
   "first_output": "一篇内容母稿",
   "optional_modules": ["profile", "stories", "methods", "content", "talks"],
+  "self_modules": ["identity", "values", "preferences", "stage_reviews", "ai_collaboration"],
   "project_types": ["product", "learning"],
   "custom_project_types": [],
   "task_system": "none",
@@ -44,6 +46,8 @@
 ## 允许值
 
 - `mode`: `new` 或 `existing`
+- `interview_depth`: `quick`, `standard`, `deep`
+- `self_modules`: `identity`, `values`, `personality`, `preferences`, `health_energy`, `family_intimacy`, `social_relations`, `stage_reviews`, `journal`, `ai_collaboration`
 - `optional_modules`: `profile`, `products`, `customers`, `stories`, `methods`, `content`, `business_knowledge`, `opportunities`, `talks`, `career`
 - `project_types`: `work`, `client`, `product`, `content`, `learning`, `community`, `hackathon`
 - `task_system`: `none`, `todoist`, `other`
@@ -61,3 +65,5 @@
 6. 已有 Vault 的动态模块证据可来自已有笔记或本次增量确认；应在 `evidence` 中标明来源笔记，不得统一写成“来自采访”。
 7. `context_review.source_index_note`、`read_scope` 和 `excluded_paths` 都使用 Vault 内相对路径；不存储绝对路径、密钥或 private 正文。
 8. `known / missing / conflicts / stale_candidates` 只写非敏感主题名和差额状态。详细来源与用户修正保存在 `source_index_note` 指向的 private 审计 / 补访记录。
+9. `self_modules` 只列本轮已经选择、存在可靠旧证据或已经产生真实内容的自我模块。高敏感模块不能因为选择了 `deep` 就自动全部启用。
+10. `99-隐私边界与公开授权` 是固定模块，不写进 `self_modules`。

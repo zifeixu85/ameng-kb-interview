@@ -53,6 +53,7 @@ class DistributionTests(unittest.TestCase):
                 "references/interview-playbook.md",
                 "references/note-contract.md",
                 "references/routing-and-privacy.md",
+                "references/self-manual-interview.md",
                 "references/structure-plan-schema.md",
                 "references/vault-architecture.md",
             ):
@@ -75,6 +76,18 @@ class DistributionTests(unittest.TestCase):
             self.assertEqual(
                 archive.read("starter-vault/AGENTS.md"),
                 (ROOT / "skill" / "ameng-kb-interview" / "assets" / "starter-vault" / "AGENTS.md").read_bytes(),
+            )
+            self_paths = [
+                name
+                for name in archive.namelist()
+                if name.startswith("starter-vault/10-自我说明书/")
+            ]
+            self.assertEqual(
+                sorted(self_paths),
+                [
+                    "starter-vault/10-自我说明书/99-隐私边界与公开授权/隐私边界与公开授权.md",
+                    "starter-vault/10-自我说明书/README.md",
+                ],
             )
 
 

@@ -66,6 +66,52 @@ MODULES = {
     },
 }
 
+SELF_MODULES = {
+    "identity": {
+        "path": "10-自我说明书/01-身份与经历",
+        "description": "身份变化、成长经历、职业路径与重要阶段。",
+    },
+    "values": {
+        "path": "10-自我说明书/02-价值观与驱动力",
+        "description": "价值排序、内在驱动、长期目标与关键取舍。",
+    },
+    "personality": {
+        "path": "10-自我说明书/03-性格底色与心理测试",
+        "description": "性格特征、情绪模式、心理测试与个人对结果的判断。",
+    },
+    "preferences": {
+        "path": "10-自我说明书/04-偏好审美与表达习惯",
+        "description": "工作偏好、审美标准、沟通方式与表达习惯。",
+    },
+    "health_energy": {
+        "path": "10-自我说明书/05-身体健康与能量状态",
+        "description": "健康背景、身体信号、能量规律与自我照顾。",
+    },
+    "family_intimacy": {
+        "path": "10-自我说明书/06-家庭亲密关系与责任",
+        "description": "家庭背景、亲密关系、关系责任与影响当前选择的上下文。",
+    },
+    "social_relations": {
+        "path": "10-自我说明书/07-社会生活与重要关系",
+        "description": "社会生活、支持网络、重要关系与人际边界。",
+    },
+    "stage_reviews": {
+        "path": "10-自我说明书/08-状态变化与阶段复盘",
+        "description": "当前状态、阶段变化、关键决定与定期复盘。",
+    },
+    "journal": {
+        "path": "10-自我说明书/09-日记与自我观察",
+        "description": "日常记录、自我观察、反复模式与尚未形成结论的原始感受。",
+    },
+    "ai_collaboration": {
+        "path": "10-自我说明书/10-AI协作偏好",
+        "description": "AI 的读取顺序、沟通偏好、工作边界与高效协作方式。",
+    },
+}
+
+SELF_ROOT = PurePosixPath("10-自我说明书")
+SELF_PRIVACY_ROOT = "99-隐私边界与公开授权"
+
 PROJECT_TYPES = {
     "work": "工作项目",
     "client": "客户交付",
@@ -77,6 +123,7 @@ PROJECT_TYPES = {
 }
 
 ALLOWED_MODES = {"new", "existing"}
+ALLOWED_INTERVIEW_DEPTHS = {"quick", "standard", "deep"}
 SAFE_NAME = re.compile(r"^[^/\\:*?\"<>|.][^/\\:*?\"<>|]*$")
 MAPPABLE_ROOTS = {
     "00-系统工作台",
@@ -110,7 +157,9 @@ def load_plan(plan_path: str | None) -> dict:
             "schema_version": 1,
             "vault_name": "个人知识库",
             "mode": "new",
+            "interview_depth": "quick",
             "primary_uses": [],
+            "self_modules": [],
             "optional_modules": [],
             "project_types": [],
             "custom_project_types": [],
@@ -129,9 +178,26 @@ def validate_plan(plan: dict) -> None:
         raise ValueError("structure plan must use schema_version 1")
     if plan.get("mode", "new") not in ALLOWED_MODES:
         raise ValueError("mode must be 'new' or 'existing'")
+    if plan.get("interview_depth", "quick") not in ALLOWED_INTERVIEW_DEPTHS:
+        raise ValueError("interview_depth must be 'quick', 'standard', or 'deep'")
     unknown_modules = set(plan.get("optional_modules", [])) - set(MODULES)
     if unknown_modules:
         raise ValueError(f"unknown optional_modules: {sorted(unknown_modules)}")
+    self_modules = plan.get("self_modules", [])
+    if not isinstance(self_modules, list):
+        raise ValueError("self_modules must be an array")
+    if any(not isinstance(item, str) for item in self_modules):
+        raise ValueError("self_modules must contain only strings")
+    unknown_self_modules = set(self_modules) - set(SELF_MODULES)
+    if unknown_self_modules:
+        raise ValueError(f"unknown self_modules: {sorted(unknown_self_modules)}")
+    if len(self_modules) != len(set(self_modules)):
+        raise ValueError("self_modules must not contain duplicates")
+    for config in SELF_MODULES.values():
+        validate_relative_path(config["path"], "self module path")
+        path = PurePosixPath(config["path"])
+        if path.parent != SELF_ROOT or path.name == SELF_PRIVACY_ROOT:
+            raise ValueError(f"unsafe self module path: {config['path']!r}")
     unknown_projects = set(plan.get("project_types", [])) - set(PROJECT_TYPES)
     if unknown_projects:
         raise ValueError(f"unknown project_types: {sorted(unknown_projects)}")
@@ -209,6 +275,14 @@ def module_readme(title: str, description: str) -> str:
     return f"# {title}\n\n{description}\n\n> 本模块由首次建库采访或已有笔记证据按需启用。只有产生真实内容时才继续增加子目录。\n"
 
 
+def self_module_readme(title: str, description: str) -> str:
+    return (
+        f"# {title}\n\n"
+        f"{description}\n\n"
+        "> 本模块默认 `private`。它只在采访或已有笔记证据说明确有需要时启用；其中内容不自动进入公开输出。\n"
+    )
+
+
 def project_readme(title: str) -> str:
     return (
         f"# {title}\n\n"
@@ -243,7 +317,7 @@ def start_here_markdown(mappings: dict[str, str]) -> str:
             "",
             "1. 在 Codex 中打开与 Obsidian 相同的 Vault 文件夹。",
             "2. 输入：`使用 $ameng-kb-interview 帮我完成首次采访建库。`",
-            "3. 选择快速版或完整版。",
+            "3. 选择快速、标准或深度版。",
             "4. 采访结束后先检查目录预案，再确认写入。",
             "5. 用一份真实资料跑通第一次输入和输出。",
             "",
@@ -252,6 +326,8 @@ def start_here_markdown(mappings: dict[str, str]) -> str:
             *link_lines,
             "",
             "> Obsidian 管上下文、判断、复盘和资产。任务与日历可以继续使用你原来的工具，不是本知识库的必选项。",
+            "",
+            "> 深度自我说明书通常需要数小时，不要求一次完成。每个模块都会单独形成阶段成果，并保存下次恢复位置。",
             "",
         ]
     )
@@ -296,6 +372,7 @@ def agents_markdown(mappings: dict[str, str]) -> str:
 
 
 def plan_markdown(plan: dict) -> str:
+    self_enabled = plan.get("self_modules", [])
     enabled = plan.get("optional_modules", [])
     projects = plan.get("project_types", [])
     custom = plan.get("custom_project_types", [])
@@ -307,14 +384,17 @@ def plan_markdown(plan: dict) -> str:
         f"- 结构版本：{plan.get('schema_version', 1)}",
         f"- Vault 名称：{plan.get('vault_name', '个人知识库')}",
         f"- 接入模式：{plan.get('mode', 'new')}",
+        f"- 采访深度：{plan.get('interview_depth', 'quick')}",
         f"- 首个输入：{plan.get('first_input', '待确认')}",
         f"- 首个输出：{plan.get('first_output', '待确认')}",
         f"- 任务系统：{plan.get('task_system', 'none')}",
         f"- 日历系统：{plan.get('calendar_system', 'none')}",
         "",
-        "## 已启用模块",
+        "## 已启用自我说明书模块",
         "",
     ]
+    lines.extend([f"- `{item}`：{SELF_MODULES[item]['path']}" for item in self_enabled] or ["- 暂无；仅保留固定的隐私边界与公开授权"])
+    lines.extend(["", "## 已启用可复用资产模块", ""])
     lines.extend([f"- `{item}`：{MODULES[item]['path']}" for item in enabled] or ["- 暂无"])
     lines.extend(["", "## 已启用项目类型", ""])
     lines.extend([f"- `{item}`：{PROJECT_TYPES[item]}" for item in projects] or ["- 暂无"])
@@ -434,7 +514,17 @@ def copy_starter(writer: Writer, mappings: dict[str, str]) -> None:
     if not STARTER_ROOT.exists():
         raise FileNotFoundError(f"starter vault not found: {STARTER_ROOT}")
     for source in sorted(STARTER_ROOT.rglob("*")):
-        relative = remap(source.relative_to(STARTER_ROOT), mappings)
+        starter_relative = source.relative_to(STARTER_ROOT)
+        parts = starter_relative.parts
+        if (
+            len(parts) >= 2
+            and parts[0] == SELF_ROOT.as_posix()
+            and parts[1] not in {"README.md", SELF_PRIVACY_ROOT}
+        ):
+            # Self-description modules are interview-driven.  The starter keeps
+            # only the root README and the mandatory privacy/authorization area.
+            continue
+        relative = remap(starter_relative, mappings)
         if source.is_dir():
             writer.ensure_dir(relative)
         else:
@@ -447,6 +537,15 @@ def build(plan: dict, vault: Path, dry_run: bool) -> dict:
     if not vault.exists() and not dry_run:
         vault.mkdir(parents=True)
     copy_starter(writer, mappings)
+
+    for module_id in plan.get("self_modules", []):
+        config = SELF_MODULES[module_id]
+        module_path = remap(Path(config["path"]), mappings)
+        writer.ensure_dir(module_path)
+        writer.write_if_missing(
+            module_path / "README.md",
+            self_module_readme(module_path.name, config["description"]),
+        )
 
     for module_id in plan.get("optional_modules", []):
         config = MODULES[module_id]
